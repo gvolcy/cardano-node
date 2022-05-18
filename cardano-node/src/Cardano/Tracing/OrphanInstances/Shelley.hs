@@ -65,15 +65,8 @@ import           Ouroboros.Consensus.Util.Condense (condense)
 import           Ouroboros.Network.Block (SlotNo (..), blockHash, blockNo, blockSlot)
 import           Ouroboros.Network.Point (WithOrigin, withOriginToMaybe)
 
-import qualified Data.Aeson as Aeson
-import qualified Data.Aeson.Types as Aeson
-import qualified Data.Set as Set
-import qualified Data.Text as Text
 import qualified Cardano.Api as Api
 import qualified Cardano.Api.Shelley as Api
-import qualified Ouroboros.Consensus.Protocol.Ledger.HotKey as HotKey
-import qualified Ouroboros.Consensus.Protocol.Praos as Praos
-import qualified Ouroboros.Consensus.Shelley.Protocol.Praos as Praos
 import qualified Cardano.Crypto.Hash.Class as Crypto
 import qualified Cardano.Ledger.Alonzo.PlutusScriptApi as Alonzo
 import qualified Cardano.Ledger.Alonzo.Rules.Utxo as Alonzo
@@ -86,7 +79,14 @@ import qualified Cardano.Ledger.Crypto as Core
 import qualified Cardano.Ledger.Era as Ledger
 import qualified Cardano.Ledger.SafeHash as SafeHash
 import qualified Cardano.Ledger.ShelleyMA.Rules.Utxo as MA
+import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Key as Aeson
+import qualified Data.Aeson.Types as Aeson
+import qualified Data.Set as Set
+import qualified Data.Text as Text
+import qualified Ouroboros.Consensus.Protocol.Ledger.HotKey as HotKey
+import qualified Ouroboros.Consensus.Protocol.Praos as Praos
+import qualified Ouroboros.Consensus.Shelley.Protocol.Praos as Praos
 
 {- HLINT ignore "Use :" -}
 
