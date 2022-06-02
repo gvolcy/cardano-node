@@ -31,10 +31,10 @@ sendEmail
   :: EmailSettings
   -> Mail
   -> IO StatusMessage
-sendEmail EmailSettings {esEmailTo, esSMTPHost, esSMTPPort, esUsername, esPassword, esSSL} mail =
+sendEmail EmailSettings {esSMTPHost, esSMTPPort, esUsername, esPassword, esSSL} mail =
   try_ (sender host port user pass mail) >>= \case
     Left e  -> return $ "Unable to send email: " <> T.pack (show e)
-    Right _ -> return $ "Yay! Notification to " <> esEmailTo <> " sent."
+    Right _ -> return $ "Yay! Notification is sent."
  where
   sender = case esSSL of
              TLS      -> SMTP.sendMailWithLoginTLS'

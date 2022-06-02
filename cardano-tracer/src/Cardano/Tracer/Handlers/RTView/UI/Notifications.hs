@@ -1,10 +1,11 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Cardano.Tracer.Handlers.RTView.UI.Notifications
-  ( restoreEmailSettings
+  ( checkRequiredEmailSettings
+  , getCurrentEmailSettings
+  , restoreEmailSettings
   , saveEmailSettings
   ) where
 
@@ -13,10 +14,11 @@ import           Control.Monad (unless)
 import           Crypto.Cipher.AES (AES256)
 import           Crypto.Cipher.Types (BlockCipher (..), cipherInit, ctrCombine, nullIV)
 import           Crypto.Error (CryptoError, eitherCryptoError)
+import           Data.Aeson (decodeStrict', encode)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as LBS
-import           Data.Aeson (decodeStrict', encode)
 import           Data.Text (pack, unpack)
+import qualified Data.Text as T
 import           Graphics.UI.Threepenny.Core
 
 import           Cardano.Tracer.Handlers.RTView.System
@@ -43,7 +45,7 @@ restoreEmailSettings window = readSavedEmailSettings >>= setEmailSettings
 
 saveEmailSettings :: Window -> UI ()
 saveEmailSettings window = do
-  settings <- getCurrentSettings window
+  settings <- getCurrentEmailSettings window
   liftIO . ignore $ do
     (pathToEmailSettings, _) <- getPathsToNotificationsSettings
     -- Encrypt JSON-content to avoid saving user's private data in "plain mode".
@@ -51,8 +53,8 @@ saveEmailSettings window = do
       Right encryptedJSON -> BS.writeFile pathToEmailSettings encryptedJSON
       Left _ -> return ()
 
-getCurrentSettings :: Window -> UI EmailSettings
-getCurrentSettings window = do
+getCurrentEmailSettings :: Window -> UI EmailSettings
+getCurrentEmailSettings window = do
   smtpHost  <- findAndGetValue window "es-smtp-host"
   smtpPort  <- findAndGetValue window "es-smtp-port"
   username  <- findAndGetValue window "es-username"
@@ -71,6 +73,18 @@ getCurrentSettings window = do
     , esEmailTo   = pack emailTo
     , esSubject   = pack subject
     }
+
+checkRequiredEmailSettings :: Window -> UI Bool
+checkRequiredEmailSettings window = do
+  EmailSettings host _ user pass _ eFrom eTo _ <- getCurrentEmailSettings window
+  return $
+       isHere host
+    && isHere user
+    && isHere pass
+    && isHere eFrom
+    && isHere eTo
+ where
+  isHere = not . T.null
 
 readSavedEmailSettings :: UI EmailSettings
 readSavedEmailSettings = liftIO $ do
