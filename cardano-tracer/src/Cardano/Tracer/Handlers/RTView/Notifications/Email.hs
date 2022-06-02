@@ -1,15 +1,17 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Cardano.Tracer.Handlers.RTView.Notifications.Email
-  ( createAndSendTestEmail
+  ( StatusMessage
+  , createAndSendTestEmail
   ) where
 
 import           Control.Exception.Extra (try_)
-import qualified Network.Mail.SMTP as SMTP
-import           Network.Mail.Mime (Address (..), Mail (..), simpleMail')
 import           Data.Text (Text)
 import qualified Data.Text as T
+import           Network.Mail.Mime (Address (..), Mail (..), simpleMail')
+import qualified Network.Mail.SMTP as SMTP
 
 import           Cardano.Tracer.Handlers.RTView.UI.Types
 
@@ -18,28 +20,27 @@ type StatusMessage = Text
 createAndSendTestEmail
   :: EmailSettings
   -> IO StatusMessage
-createAndSendTestEmail settings =
-  sendEmail settings $ simpleMail' to from subject body
+createAndSendTestEmail settings@EmailSettings {esEmailTo, esEmailFrom, esSubject} =
+  sendEmail settings $ simpleMail' to from esSubject body
  where
-  to      = Address Nothing (esEmailTo settings)
-  from    = Address (Just "Cardano RTView") (esEmailFrom settings)
-  subject = esSubject settings
-  body    = "This is a test notification from Cardano RTView. Congrats: your email settings are correct!"
+  to   = Address Nothing esEmailTo
+  from = Address (Just "Cardano RTView") esEmailFrom
+  body = "This is a test notification from Cardano RTView. Congrats: your email settings are correct!"
 
 sendEmail
   :: EmailSettings
   -> Mail
   -> IO StatusMessage
-sendEmail settings mail =
+sendEmail EmailSettings {esEmailTo, esSMTPHost, esSMTPPort, esUsername, esPassword, esSSL} mail =
   try_ (sender host port user pass mail) >>= \case
     Left e  -> return $ "Unable to send email: " <> T.pack (show e)
-    Right _ -> return $ "Yay! Email notification to " <> esEmailTo settings <> " sent."
+    Right _ -> return $ "Yay! Notification to " <> esEmailTo <> " sent."
  where
-  sender = case esSSL settings of
+  sender = case esSSL of
              TLS      -> SMTP.sendMailWithLoginTLS'
              STARTTLS -> SMTP.sendMailWithLoginSTARTTLS'
              NoSSL    -> SMTP.sendMailWithLogin'
-  host = T.unpack (esSMTPHost settings)
-  port = fromIntegral (esSMTPPort settings)
-  user = T.unpack (esUsername settings)
-  pass = T.unpack (esPassword settings)
+  host = T.unpack esSMTPHost
+  port = fromIntegral esSMTPPort
+  user = T.unpack esUsername
+  pass = T.unpack esPassword
