@@ -11,7 +11,6 @@ import           Network.Mail.Mime (Address (..), Mail (..), simpleMail')
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import           Cardano.Tracer.Handlers.RTView.System
 import           Cardano.Tracer.Handlers.RTView.UI.Types
 
 type StatusMessage = Text
