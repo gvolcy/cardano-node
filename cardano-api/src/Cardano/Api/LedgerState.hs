@@ -142,7 +142,7 @@ import qualified Ouroboros.Consensus.HardFork.Combinator as Consensus
 import qualified Ouroboros.Consensus.HardFork.Combinator.AcrossEras as HFC
 import qualified Ouroboros.Consensus.HardFork.Combinator.Basics as HFC
 import qualified Ouroboros.Consensus.Ledger.Abstract as Ledger
-import           Ouroboros.Consensus.Ledger.Basics (EmptyMK, LedgerResult (lrEvents), lrResult)
+import           Ouroboros.Consensus.Ledger.Basics (EmptyMK, ValuesMK, LedgerResult (lrEvents), lrResult)
 import qualified Ouroboros.Consensus.Ledger.Extended as Ledger
 import qualified Ouroboros.Consensus.Mempool.TxLimits as TxLimits
 import qualified Ouroboros.Consensus.Node.ProtocolInfo as Consensus
@@ -1219,7 +1219,7 @@ tickThenReapplyCheckHash
     -> Either LedgerStateError LedgerStateEvents
 tickThenReapplyCheckHash cfg block lsb =
   if Consensus.blockPrevHash block == Ledger.ledgerTipHash lsb
-    then Right . toLedgerStateEvents . fmap Ledger.forgetLedgerStateTables
+    then Right . toLedgerStateEvents . fmap Ledger.forgetLedgerTables
           $ Ledger.tickThenReapplyLedgerResult cfg block (utxohdStopGap lsb)
     else Left $ ApplyBlockHashMismatch $ mconcat
                   [ "Ledger state hash mismatch. Ledger head is slot "
@@ -1253,7 +1253,7 @@ tickThenApply
             (Consensus.CardanoEras Shelley.StandardCrypto)) EmptyMK
     -> Either LedgerStateError LedgerStateEvents
 tickThenApply cfg block lsb
-  = either (Left . ApplyBlockError) (Right . toLedgerStateEvents . fmap Ledger.forgetLedgerStateTables)
+  = either (Left . ApplyBlockError) (Right . toLedgerStateEvents . fmap Ledger.forgetLedgerTables)
   $ runExcept
   $ Ledger.tickThenApplyLedgerResult cfg block (utxohdStopGap lsb)
 
